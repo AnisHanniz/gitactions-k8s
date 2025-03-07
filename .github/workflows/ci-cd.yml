@@ -40,17 +40,16 @@ jobs:
 
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
-
-      - name: Configure kubectl
+        
+      - name: Configure kubeconfig
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
-
+          
       - name: Create deployment file if not exists
         run: |
-          if [ ! -f deployment.yaml ]; then
-            cat > deployment.yaml << EOF
+          cat > deployment.yaml << EOF
           apiVersion: apps/v1
           kind: Deployment
           metadata:
@@ -69,7 +68,7 @@ jobs:
               spec:
                 containers:
                 - name: test-cesi-web-app
-                  image: anishanniz/test-cesi-web-app:${{ github.sha }}
+                  image: anishanniz/test-cesi-web-app:latest
                   ports:
                   - containerPort: 80
           ---
@@ -85,15 +84,7 @@ jobs:
               targetPort: 80
             type: ClusterIP
           EOF
-          fi
 
       - name: Deploy to Kubernetes
         run: |
-          # Update image tag in deployment file if it already exists
-          sed -i "s|image: anishanniz/test-cesi-web-app:.*|image: anishanniz/test-cesi-web-app:${{ github.sha }}|" deployment.yaml
-          
-          # Apply Kubernetes manifests
-          kubectl apply -f deployment.yaml
-          
-          # Verify deployment
-          kubectl rollout status deployment/test-cesi-web-app
+          kubectl apply -f deployment.yaml --validate=false
