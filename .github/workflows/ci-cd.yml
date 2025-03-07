@@ -68,7 +68,7 @@ jobs:
               spec:
                 containers:
                 - name: nginx
-                  image: anishanniz/test-cesi-web-app:v1
+                  image: anishanniz/test-cesi-web-app:latest
                   ports:
                   - containerPort: 80
           ---
